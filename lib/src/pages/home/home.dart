@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo/src/controller/todoController.dart';
 import 'package:todo/src/models/Todo.dart';
 import 'package:todo/src/other/commons/CusAppBar.dart';
+import 'package:todo/src/other/enums/urgency.dart';
 import 'package:todo/src/pages/home/todoBox.dart';
+import 'package:todo/src/routes.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,7 +20,7 @@ class _HomeState extends State<Home> {
   late TodoController controller;
   TextEditingController todoTitle = TextEditingController();
   TextEditingController todoDescription = TextEditingController();
-  String severity = "UI";
+  Urgency severity = Urgency.UI;
 
   @override
   void initState() {
@@ -28,13 +31,19 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [const TodoBox(), menuList()],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addTodo,
-        child: const Icon(Icons.add),
+      appBar: AppBar(),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CusAppBar(appbarTitle: "Home"),
+            const SizedBox(
+              height: 16,
+            ),
+            const TodoBox(),
+            menuList()
+          ],
+        ),
       ),
     );
   }
@@ -43,8 +52,8 @@ class _HomeState extends State<Home> {
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const CusAppBar(appbarTitle: "Home"),
           const Text(
             "Menu",
             style: TextStyle(fontSize: 24),
@@ -52,99 +61,61 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.only(top: 16),
             child: Container(
-                // Here goes Grid View1
-                ),
+              child: GridView.count(
+                shrinkWrap: true,
+                primary: false,
+                padding: const EdgeInsets.all(20),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                crossAxisCount: 2,
+                children: <Widget>[
+                  menuContainer("Todo List", Icons.today_outlined, Routes().todoPage),
+                  menuContainer("Completed Todo", Icons.check_box, Routes().completedTodoPage),
+                ],
+              ),
+            ),
           )
         ],
       ),
     );
   }
 
-  Future<void> initializeData() async {
-    controller = Get.put(TodoController());
-    controller.getAllList();
+  InkWell menuContainer(title, icon, route) {
+    return InkWell(
+      onTap: (){Get.toNamed(route);},
+      child: Container(
+        decoration: BoxDecoration(
+        color: Colors.black87,borderRadius: BorderRadius.circular(20)),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            FittedBox(
+              child: Icon(
+                icon,
+                color: Colors.white,
+                size: 50,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            FittedBox(
+              child: Text(
+                title,
+                style: const TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  _addTodo() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text("Add Todo"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: todoTitle,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(), hintText: "Todo Title"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  controller: todoDescription,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Todo Description"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                DropdownButton(
-                    value: "UI",
-                    items: const [
-                      DropdownMenuItem(
-                          value: "UI", child: Text("Urgent Important")),
-                      DropdownMenuItem(
-                          value: "UNI", child: Text("Urgent Not Important")),
-                      DropdownMenuItem(
-                          value: "NUI", child: Text("Not Urgent Important")),
-                      DropdownMenuItem(
-                          value: "NUNI",
-                          child: Text("Not Urgent Not Important")),
-                    ],
-                    onChanged: (item) {
-                      print("${item} is the type you selected");
-                      severity = item ?? 'UI';
-                    }),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Cancel")),
-              TextButton(
-                  onPressed: () async {
-                    if (todoTitle.text.isNotEmpty &&
-                        todoDescription.text.isNotEmpty) {
-                      bool isDataEntered = await controller.insertTodo(
-                          todoTitle.text, todoDescription.text, severity);
-                      if (isDataEntered) {
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Success'),
-                                content:
-                                    const Text('Todo Entered Successfully'),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Ok")),
-                                ],
-                              );
-                            });
-                      }
-                    }
-                  },
-                  child: const Text("Ok"))
-            ],
-          );
-        });
+  Future<void> initializeData() async {
+    controller = Get.put(TodoController());
+    controller.getAllList(null);
   }
 }

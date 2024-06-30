@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo/src/models/Todo.dart';
 import '../other/enums/urgency.dart';
@@ -17,12 +16,9 @@ class DBHelper {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  void getTodos() {}
-
-  Future<List<Todo>> getMenuPageTodo() async {
-    var response = _prefs.getStringList(Urgency.UI.toString());
+  List<Todo> getTodos(String severity) {
+    var response = _prefs.getStringList(severity);
     if (response == null) {
-      print("There is not data in the database");
       return [];
     }
     List<Todo> todoList = [];
@@ -31,53 +27,86 @@ class DBHelper {
       var todoItem = Todo.fromJson(map);
       todoList.add(todoItem);
     }
-    print(
-        "${todoList} is the data in the model and the length is ${todoList.length}");
     return todoList;
   }
 
-  Future<bool> insertTodo(Todo todo, severity) async {
+  Future<bool> insertTodo(Todo todo, Urgency severity) async {
     bool isDataEntered = false;
 
     switch (severity) {
-      case 'UI':
-        print("Switch case is working");
-        List<String> response = _prefs.getStringList('UI') ?? [];
+      case Urgency.UI:
+        print("Switch case is working while inserting data");
+        List<String> response = _prefs.getStringList(Urgency.UI.toString()) ?? [];
         if (response.isNotEmpty) {
+          print("UI has Data");
           response.add(jsonEncode(todo.toJson()));
           isDataEntered =
               await _prefs.setStringList(Urgency.UI.toString(), response);
         } else {
+          print("UI has no Data");
           List<String> list = [jsonEncode(todo.toJson())];
           isDataEntered =
               await _prefs.setStringList(Urgency.UI.toString(), list);
         }
         break;
-      case 'UNI':
-        var response = _prefs.getStringList('UNI');
-        if (response != null) {
+      case Urgency.UNI:
+        List<String> response = _prefs.getStringList(Urgency.UNI.toString()) ?? [];
+        if (response.isNotEmpty) {
           response.add(jsonEncode(todo.toJson()));
           isDataEntered =
               await _prefs.setStringList(Urgency.UNI.toString(), response);
+        }else {
+          List<String> list = [jsonEncode(todo.toJson())];
+          isDataEntered =
+              await _prefs.setStringList(Urgency.UNI.toString(), list);
         }
         break;
-      case 'NUI':
-        var response = _prefs.getStringList('NUI');
-        if (response != null) {
+      case Urgency.NUI:
+        List<String> response = _prefs.getStringList(Urgency.NUI.toString()) ?? [];
+        if (response.isNotEmpty) {
           response.add(jsonEncode(todo.toJson()));
           isDataEntered =
               await _prefs.setStringList(Urgency.NUI.toString(), response);
+        } else {
+          List<String> list = [jsonEncode(todo.toJson())];
+          isDataEntered =
+              await _prefs.setStringList(Urgency.NUI.toString(), list);
         }
         break;
-      case 'NUNI':
-        var response = _prefs.getStringList('NUNI');
-        if (response != null) {
+      case Urgency.NUNI:
+        List<String> response = _prefs.getStringList(Urgency.NUNI.toString()) ?? [];
+        if (response.isNotEmpty) {
           response.add(jsonEncode(todo.toJson()));
           isDataEntered =
               await _prefs.setStringList(Urgency.NUNI.toString(), response);
+        } else{
+          List<String> list = [jsonEncode(todo.toJson())];
+          isDataEntered =
+              await _prefs.setStringList(Urgency.NUNI.toString(), list);
         }
         break;
     }
     return isDataEntered;
+  }
+
+  Future<bool> updateTodo(Todo todo, Urgency severity, int index) async {
+    List<String> response = _prefs.getStringList(severity.toString()) ?? [];
+    response[index] = jsonEncode(todo.toJson());
+    return _prefs.setStringList(severity.toString(), response);
+  }
+
+  Future<bool> completeTask(int index, Urgency severity){
+    List<String> response = _prefs.getStringList(severity.toString()) ?? [];
+    var map = jsonDecode(response[index]);
+    var todoItem = Todo.fromJson(map);
+    todoItem.isCompleted = true;
+    response[index] = jsonEncode(todoItem.toJson());
+    return _prefs.setStringList(severity.toString(), response);
+  }
+
+  Future<bool> deleteTask(int index, Urgency taskUrgency) {
+    List<String> response = _prefs.getStringList(taskUrgency.toString()) ?? [];
+    response.removeAt(index);
+    return _prefs.setStringList(taskUrgency.toString(), response);
   }
 }
