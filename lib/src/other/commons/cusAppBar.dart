@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo/src/other/colors.dart';
 
 class CusAppBar extends StatefulWidget {
   final String appbarTitle;
@@ -26,7 +27,7 @@ class _CusAppBarState extends State<CusAppBar> {
         child: Text(
           title,
           style: const TextStyle(
-              color: Colors.black, fontSize: 35, fontWeight: FontWeight.w500),
+              color: black, fontSize: 35, fontWeight: FontWeight.w500),
         ),
       ),
     );

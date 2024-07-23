@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo/src/controller/todoController.dart';
+import 'package:todo/src/other/colors.dart';
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -48,7 +49,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
         child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: Colors.black87,
+        color: black87,
       ),
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(15),
@@ -59,11 +60,11 @@ class _HomeDashboardState extends State<HomeDashboard> {
         children: [
           Text(
             heading,
-            style: const TextStyle(fontSize: 22, color: Colors.white),
+            style: const TextStyle(fontSize: 22, color: white),
           ),
           Text(
             text,
-            style: const TextStyle(fontSize: 18, color: Colors.white),
+            style: const TextStyle(fontSize: 18, color: white),
           ),
         ],
       )),

@@ -64,7 +64,7 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTodo,
-        backgroundColor: Colors.black87,
+        backgroundColor: black87,
         child: const Icon(
           Icons.add,
           color: white,
