@@ -26,7 +26,7 @@ class _CusAppBarState extends State<CusAppBar> {
         child: Text(
           title,
           style: const TextStyle(
-              color: Colors.black, fontSize: 24, fontWeight: FontWeight.w600),
+              color: Colors.black, fontSize: 35, fontWeight: FontWeight.w500),
         ),
       ),
     );

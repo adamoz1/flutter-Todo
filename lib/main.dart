@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:todo/src/other/colors.dart';
 import 'package:todo/src/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:todo/src/db/DBHelper.dart';
@@ -19,7 +20,10 @@ class MainApp extends StatelessWidget {
       getPages: Routes().getRoutes(),
       initialRoute: Routes().homePage,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, fontFamily: 'JosefinSans'),
+      theme: ThemeData(
+          useMaterial3: true,
+          fontFamily: 'JosefinSans',
+          scaffoldBackgroundColor: white),
     );
   }
 }
