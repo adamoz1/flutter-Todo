@@ -14,9 +14,7 @@ class TodoController extends GetxController {
   getDashboardDetail() {
     int totalCompletedTasks = 0;
     int totalInCompleteTasks = 0;
-    print('Length of the list is ${todoUIList.length}');
     todoUIList.forEach((e) {
-      print('is Completed ${e.isCompleted}');
       if (e.isCompleted == true) {
         totalCompletedTasks++;
       } else {
@@ -44,7 +42,6 @@ class TodoController extends GetxController {
         totalInCompleteTasks++;
       }
     });
-    print('$totalCompletedTasks, $totalInCompleteTasks  ');
     completedTask.value = totalCompletedTasks;
     pendingTask.value = totalInCompleteTasks;
   }

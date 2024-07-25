@@ -39,7 +39,6 @@ class DBHelper {
   List<Todo> getMenuPageTodo() {
     var response = _prefs.getStringList(Urgency.UI.toString());
     if (response == null) {
-      print("There is not data in the database");
       return [];
     }
     List<Todo> todoList = [];
@@ -48,8 +47,6 @@ class DBHelper {
       var todoItem = Todo.fromJson(map);
       todoList.add(todoItem);
     }
-    print(
-        "${todoList} is the data in the model and the length is ${todoList.length}");
     return todoList;
   }
 

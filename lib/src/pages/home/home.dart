@@ -11,7 +11,6 @@ import 'package:todo/src/controller/todoController.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
-
   @override
   State<Home> createState() => _HomeState();
 }
@@ -34,32 +33,34 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            todoTitleBlock(),
-            const HomeDashboard(),
-            TodoBox(
-                list: controller.todoUIList,
-                boxTitle: "Urgent Important List:",
-                urgency: Urgency.UI),
-            TodoBox(
-              list: controller.todoUNIList,
-              boxTitle: "Urgent Not Important List:",
-              urgency: Urgency.UNI,
-            ),
-            TodoBox(
-              list: controller.todoNUIList,
-              boxTitle: "Not Urgent Important List:",
-              urgency: Urgency.NUI,
-            ),
-            TodoBox(
-              list: controller.todoNUNIList,
-              boxTitle: "Not Urgent Not Important List:",
-              urgency: Urgency.NUNI,
-            ),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              todoTitleBlock(),
+              const HomeDashboard(),
+              TodoBox(
+                  list: controller.todoUIList,
+                  boxTitle: "Urgent Important List:",
+                  urgency: Urgency.UI),
+              TodoBox(
+                list: controller.todoUNIList,
+                boxTitle: "Urgent Not Important List:",
+                urgency: Urgency.UNI,
+              ),
+              TodoBox(
+                list: controller.todoNUIList,
+                boxTitle: "Not Urgent Important List:",
+                urgency: Urgency.NUI,
+              ),
+              TodoBox(
+                list: controller.todoNUNIList,
+                boxTitle: "Not Urgent Not Important List:",
+                urgency: Urgency.NUNI,
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -129,7 +130,6 @@ class _HomeState extends State<Home> {
                     value: "NUNI", child: Text("Not Urgent Not Important")),
               ],
               onChanged: (String? item) {
-                print("${item} is the type you selected");
                 severity.value = item ?? "UI";
               })),
           const SizedBox(
@@ -139,7 +139,6 @@ class _HomeState extends State<Home> {
             controller: complitionDate,
             onTap: () async {
               try {
-                print('Date Time before allocation ${complitionDate.text}');
                 DateTime currentDate = DateTime.parse(complitionDate.text);
                 var date = await showDatePicker(
                     context: context,
@@ -149,8 +148,6 @@ class _HomeState extends State<Home> {
                     lastDate: DateTime(DateTime.now().year + 10));
                 if (date != null) {
                   complitionDate.text = date.toString().substring(0, 10);
-                  print(date.toString());
-                  print(complitionDate.text);
                 }
               } catch (e) {
                 print(e);
@@ -175,6 +172,12 @@ class _HomeState extends State<Home> {
                 bool isDataEntered = await controller.insertTodo(todoTitle.text,
                     todoDescription.text, severity.value, complitionDate.text);
                 if (isDataEntered) {
+                  todoTitle.text = "";
+                  todoDescription.text = "";
+                  severity.value = "UI";
+                  complitionDate.text =
+                      DateTime.now().toString().substring(0, 10);
+                  Navigator.pop(context);
                   showDialog(
                       // ignore: use_build_context_synchronously
                       context: context,
@@ -185,7 +188,6 @@ class _HomeState extends State<Home> {
                           actions: [
                             TextButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
                                   Navigator.pop(context);
                                 },
                                 child: const Text("Ok")),

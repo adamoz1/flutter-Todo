@@ -1,6 +1,5 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, invalid_use_of_protected_member
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo/src/controller/todoController.dart';
@@ -26,6 +25,9 @@ class _TodoBoxState extends State<TodoBox> {
   late String title;
   late RxList todoList;
   late Urgency _urgency;
+  var shouldShowTextMessage = true.obs;
+  TodoController controller = Get.find();
+  late RxBool showCompleteTodo = true.obs;
 
   @override
   void initState() {
@@ -37,14 +39,20 @@ class _TodoBoxState extends State<TodoBox> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<TodoController>(builder: (controller) {
-      if (kDebugMode) {
-        print("$title length is ${todoList.length}");
+    return Obx(() {
+      var a = 0;
+      for (var i = 0; i < todoList.length; i++) {
+        if (todoList.value[i].isCompleted != true) {
+          a++;
+        }
+      }
+      if (a > 0) {
+        shouldShowTextMessage.value = false;
       }
       return todoList.isEmpty
           ? Container()
           : Container(
-              width: double.infinity,
+              // width: double.infinity,
               padding: const EdgeInsets.all(15.0),
               margin: const EdgeInsets.all(15.0),
               decoration: BoxDecoration(
@@ -62,29 +70,73 @@ class _TodoBoxState extends State<TodoBox> {
                     style: const TextStyle(
                         fontSize: 24, decoration: TextDecoration.underline),
                   ),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                        right: MediaQuery.of(context).size.width * 0.03),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Show Completed Todo :"),
+                          Switch(
+                            value: showCompleteTodo.value,
+                            activeColor: white,
+                            activeTrackColor: completeTodo,
+                            inactiveThumbColor: black,
+                            inactiveTrackColor: incompleteTodo,
+                            onChanged: (bool value) {
+                              showCompleteTodo.value = value;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   todoList.isEmpty
                       ? const Text('No Tasks entered!')
-                      : _todoContainer(controller),
+                      : _todoContainer(),
+                  shouldShowTextMessage.value && !showCompleteTodo.value
+                      ? const Wrap(
+                          children: [
+                            Text(
+                              "There are no incomplete todo's",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ],
+                        )
+                      : Container()
                 ],
               ),
             );
     });
   }
 
-  _todoContainer(TodoController controller) {
+  _todoContainer() {
     return Container(
-      padding: const EdgeInsets.only(top: 5),
       constraints: const BoxConstraints(maxHeight: 300),
-      // height: 300,
       child: ListView.builder(
         itemCount: todoList.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
+          if (!showCompleteTodo.value &&
+              todoList.value[index].isCompleted == true) {
+            return Container();
+          }
           return Container(
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                    color: todoList[index].isCompleted == true
+                        ? completeTodo
+                        : incompleteTodo,
+                    blurRadius: 1,
+                    spreadRadius: 3)
+              ],
               color: todoList[index].isCompleted == true
                   ? completeTodo
                   : incompleteTodo,
@@ -109,15 +161,13 @@ class _TodoBoxState extends State<TodoBox> {
                             decoration: BoxDecoration(
                                 color: black87,
                                 borderRadius: BorderRadius.circular(12)),
-                            child:
-                                _revertIconButton(context, controller, index),
+                            child: _revertIconButton(context, index),
                           )
                         : Container(
                             decoration: BoxDecoration(
                                 color: black87,
                                 borderRadius: BorderRadius.circular(12)),
-                            child:
-                                _completeIconButton(context, controller, index),
+                            child: _completeIconButton(context, index),
                           ),
                     todoList[index].isCompleted
                         ? Container()
@@ -130,7 +180,7 @@ class _TodoBoxState extends State<TodoBox> {
                             decoration: BoxDecoration(
                                 color: black87,
                                 borderRadius: BorderRadius.circular(12)),
-                            child: _editIconButton(context, controller, index),
+                            child: _editIconButton(context, index),
                           ),
                     const SizedBox(
                       width: 20,
@@ -139,7 +189,7 @@ class _TodoBoxState extends State<TodoBox> {
                       decoration: BoxDecoration(
                           color: black87,
                           borderRadius: BorderRadius.circular(12)),
-                      child: _deleteIconButton(context, controller, index),
+                      child: _deleteIconButton(context, index),
                     ),
                   ],
                 )
@@ -151,8 +201,7 @@ class _TodoBoxState extends State<TodoBox> {
     );
   }
 
-  _completeIconButton(
-      BuildContext context, TodoController controller, int index) {
+  _completeIconButton(BuildContext context, int index) {
     return IconButton(
         onPressed: () {
           CusDialog.showPopUpDialog(context, "Confirmation",
@@ -200,8 +249,7 @@ class _TodoBoxState extends State<TodoBox> {
         ));
   }
 
-  _revertIconButton(
-      BuildContext context, TodoController controller, int index) {
+  _revertIconButton(BuildContext context, int index) {
     return IconButton(
         onPressed: () {
           CusDialog.showPopUpDialog(context, "Confirmation",
@@ -248,8 +296,7 @@ class _TodoBoxState extends State<TodoBox> {
         ));
   }
 
-  _deleteIconButton(
-      BuildContext context, TodoController controller, int index) {
+  _deleteIconButton(BuildContext context, int index) {
     return IconButton(
         onPressed: () {
           CusDialog.showPopUpDialog(context, "Confirmation",
@@ -257,17 +304,8 @@ class _TodoBoxState extends State<TodoBox> {
             TextButton(
                 onPressed: () async {
                   bool response = await controller.deleteTask(index, _urgency);
-                  if (response) {
-                    Navigator.pop(context);
-                    CusDialog.showPopUpDialog(context, "Success",
-                        const Text("Todo is delete Successfully"), [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Ok"))
-                    ]);
-                  } else {
+                  Navigator.pop(context);
+                  if (!response) {
                     CusDialog.showPopUpDialog(
                         context,
                         "Failure",
@@ -296,7 +334,7 @@ class _TodoBoxState extends State<TodoBox> {
         ));
   }
 
-  _editIconButton(BuildContext context, TodoController controller, int index) {
+  _editIconButton(BuildContext context, int index) {
     TextEditingController todoTitle =
         TextEditingController(text: todoList[index].title);
     TextEditingController complitionDate =
@@ -382,6 +420,9 @@ class _TodoBoxState extends State<TodoBox> {
                               actions: [
                                 TextButton(
                                     onPressed: () {
+                                      todoTitle.text = "";
+                                      todoDescription.text = "";
+                                      complitionDate.text = "";
                                       Navigator.pop(context);
                                     },
                                     child: const Text("Ok")),
